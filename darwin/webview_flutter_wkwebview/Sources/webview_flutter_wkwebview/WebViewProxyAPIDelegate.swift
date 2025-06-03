@@ -344,21 +344,22 @@ class WebViewProxyAPIDelegate: PigeonApiDelegateWKWebView, PigeonApiDelegateUIVi
       javaScriptString: javaScriptString, completion: completion)
   }
 
-  func setInspectable(
-    pigeonApi: PigeonApiUIViewWKWebView, pigeonInstance: WKWebView, inspectable: Bool
-  ) throws {
-    if #available(iOS 16.4, macOS 13.3, *) {
-      pigeonInstance.isInspectable = inspectable
-      if pigeonInstance.responds(to: Selector(("isInspectable:"))) {
-        pigeonInstance.perform(Selector(("isInspectable:")), with: inspectable)
+    func setInspectable(
+      pigeonApi: PigeonApiUIViewWKWebView, pigeonInstance: WKWebView, inspectable: Bool
+    ) throws {
+      if #available(iOS 16.4, macOS 13.3, *) {
+        if pigeonInstance.responds(to: Selector(("setInspectable:"))) {
+          pigeonInstance.perform(Selector(("setInspectable:")), with: inspectable)
+        } else {
+          print("setInspectable selector not found")
+        }
+      } else {
+        throw (pigeonApi.pigeonRegistrar as! ProxyAPIRegistrar)
+          .createUnsupportedVersionError(
+            method: "WKWebView.inspectable",
+            versionRequirements: "iOS 16.4, macOS 13.3")
       }
-    } else {
-      throw (pigeonApi.pigeonRegistrar as! ProxyAPIRegistrar)
-        .createUnsupportedVersionError(
-          method: "WKWebView.inspectable",
-          versionRequirements: "iOS 16.4, macOS 13.3")
     }
-  }
 
   func setInspectable(
     pigeonApi: PigeonApiNSViewWKWebView, pigeonInstance: WKWebView, inspectable: Bool
